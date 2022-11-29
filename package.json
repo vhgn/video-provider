@@ -1,8 +1,9 @@
 {
 	"name": "video-provider",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "React state manager for videos",
-	"main": "lib/index.js",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"repository": "https://github.com/vhgn/video-provider",
 	"author": "Vahagn",
 	"license": "MIT",
