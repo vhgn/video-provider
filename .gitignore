@@ -1,0 +1,5 @@
+# Compiled library files
+dist
+
+# No need for additional comments, probably
+node_modules
