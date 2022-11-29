@@ -37,6 +37,12 @@ export const VideoProvider = (props: VideoProviderProps) => {
   const [duration, setDuration] = useState(0);
 
   useEffect(() => {
+    if (element.current === null) return
+
+    setDuration(element.current.duration)
+  }, [element])
+
+  useEffect(() => {
     if (element.current === null) return;
 
     element.current.muted = muted;
