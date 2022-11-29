@@ -1,15 +1,26 @@
 {
+	"include": ["src"],
+	"exclude": [
+		"dist",
+		"node_modules"
+	],
 	"compilerOptions": {
-		"target": "es2016",
-		 "jsx": "preserve",
-		"module": "commonjs",
+		"module": "esnext",
+		"lib": ["dom", "esnext"],
+		"importHelpers": true,
 		"declaration": true,
-		"declarationMap": true,
 		"sourceMap": true,
-		"outDir": "./dist",
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
+		"rootDir": "./src",
+		"outDir": "./dist/esm",
 		"strict": true,
-		"skipLibCheck": true
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"moduleResolution": "node",
+		"jsx": "react",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
 	}
 }
