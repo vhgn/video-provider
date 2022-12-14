@@ -70,7 +70,9 @@ export const VideoProvider = (props: VideoProviderProps) => {
 	const play = useCallback(() => element.current?.play(), [element]);
 	const pause = useCallback(() => element.current?.pause(), [element]);
 	const seek = useCallback(
-		(progress: number) => element.current && element.current.fastSeek(progress),
+		(progress: number) => {
+			if (element.current) element.current.currentTime = progress;
+		},
 		[element]
 	);
 
