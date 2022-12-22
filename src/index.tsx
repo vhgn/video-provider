@@ -23,6 +23,25 @@ export type VideoContextValue = {
 
 export const VideoContext = createContext<VideoContextValue | null>(null);
 
+const useSaved = (name: string, init: string) => {
+	const [value, setStateValue] = useState(init);
+
+	useEffect(() => {
+		const localValue = localStorage.getItem(name);
+		if (localValue) setStateValue(localValue);
+	}, [name, init, setStateValue]);
+
+	const setValue = (value: string) => {
+		setStateValue(value);
+		localStorage.setItem(name, value);
+	};
+
+	return {
+		value,
+		setValue,
+	};
+};
+
 export interface VideoProviderProps {
 	element: RefObject<HTMLVideoElement>;
 	children: ReactNode;
@@ -32,8 +51,18 @@ export const VideoProvider = (props: VideoProviderProps) => {
 	const { element, children } = props;
 
 	const [paused, setPaused] = useState(true);
-	const [muted, mute] = useState(false);
-	const [volume, setVolume] = useState(1);
+	const savedMute = useSaved('mute', 'false');
+	const savedVolume = useSaved('volume', '1');
+
+	const mute = (value: boolean) => savedMute.setValue(value.toString());
+	const muted = savedMute.value === 'true';
+
+	const setVolume = useCallback(
+		(value: number) => savedVolume.setValue(value.toString()),
+		[savedVolume]
+	);
+	const volume = Number(savedVolume.value);
+
 	const [now, setNow] = useState(0);
 	const [duration, setDuration] = useState(0);
 
@@ -59,7 +88,7 @@ export const VideoProvider = (props: VideoProviderProps) => {
 		current.onvolumechange = () => setVolume(current.volume);
 		current.ontimeupdate = () => setNow(current.currentTime);
 		current.ondurationchange = () => setDuration(current.duration);
-	}, [element, paused]);
+	}, [element, paused, setVolume]);
 
 	useEffect(() => {
 		if (element.current === null) return;
