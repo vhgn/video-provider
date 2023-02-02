@@ -1,126 +1,129 @@
 import React, {
-	createContext,
-	ReactNode,
-	RefObject,
-	useCallback,
-	useEffect,
-	useState,
-} from 'react';
+  createContext,
+  ReactNode,
+  RefObject,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 export type VideoContextValue = {
-	now: number;
-	duration: number;
-	paused: boolean;
-	muted: boolean;
-	volume: number;
+  now: number;
+  duration: number;
+  paused: boolean;
+  muted: boolean;
+  volume: number;
 
-	play: () => void;
-	pause: () => void;
-	mute: (status: boolean) => void;
-	seek: (progress: number) => void;
-	setVolume: (value: number) => void;
+  play: () => void;
+  pause: () => void;
+  mute: (status: boolean) => void;
+  seek: (progress: number) => void;
+  setVolume: (value: number) => void;
 };
 
 export const VideoContext = createContext<VideoContextValue | null>(null);
 
-const useSaved = (name: string, init: string) => {
-	const [value, setStateValue] = useState(init);
+const useSaved = (name: string, init: string, remember: string[]) => {
+  const [value, setStateValue] = useState(init);
 
-	useEffect(() => {
-		const localValue = localStorage.getItem(name);
-		if (localValue) setStateValue(localValue);
-	}, [name, init, setStateValue]);
+  useEffect(() => {
+    if (remember.indexOf(name) === -1) return;
 
-	const setValue = (value: string) => {
-		setStateValue(value);
-		localStorage.setItem(name, value);
-	};
+    const localValue = localStorage.getItem(name);
+    if (localValue) setStateValue(localValue);
+  }, [name, init, setStateValue, remember]);
 
-	return {
-		value,
-		setValue,
-	};
+  const setValue = (value: string) => {
+    setStateValue(value);
+    localStorage.setItem(name, value);
+  };
+
+  return {
+    value,
+    setValue,
+  };
 };
 
 export interface VideoProviderProps {
-	element: RefObject<HTMLVideoElement>;
-	children: ReactNode;
+  element: RefObject<HTMLVideoElement>;
+  remember: ("mute" | "volume")[];
+  children: ReactNode;
 }
 
 export const VideoProvider = (props: VideoProviderProps) => {
-	const { element, children } = props;
+  const { element, children, remember } = props;
 
-	const [paused, setPaused] = useState(true);
-	const savedMute = useSaved('mute', 'false');
-	const savedVolume = useSaved('volume', '1');
+  const [paused, setPaused] = useState(true);
+  const savedMute = useSaved("mute", "false", remember);
+  const savedVolume = useSaved("volume", "1", remember);
 
-	const mute = (value: boolean) => savedMute.setValue(value.toString());
-	const muted = savedMute.value === 'true';
+  const mute = (value: boolean) => savedMute.setValue(value.toString());
+  const muted = savedMute.value === "true";
 
-	const setVolume = useCallback(
-		(value: number) => savedVolume.setValue(value.toString()),
-		[savedVolume]
-	);
-	const volume = Number(savedVolume.value);
+  const setVolume = useCallback(
+    (value: number) => savedVolume.setValue(value.toString()),
+    [savedVolume]
+  );
+  const volume = Number(savedVolume.value);
 
-	const [now, setNow] = useState(0);
-	const [duration, setDuration] = useState(0);
+  const [now, setNow] = useState(0);
+  const [duration, setDuration] = useState(0);
 
-	useEffect(() => {
-		if (element.current === null) return;
+  useEffect(() => {
+    if (element.current === null) return;
 
-		setDuration(element.current.duration);
-	}, [element]);
+    setDuration(element.current.duration);
+  }, [element]);
 
-	useEffect(() => {
-		if (element.current === null) return;
+  useEffect(() => {
+    if (element.current === null) return;
 
-		element.current.muted = muted;
-		element.current.volume = volume;
-	}, [element, muted, volume]);
+    element.current.muted = muted;
+    element.current.volume = volume;
+  }, [element, muted, volume]);
 
-	useEffect(() => {
-		const current = element.current;
-		if (current === null) return;
+  useEffect(() => {
+    const current = element.current;
+    if (current === null) return;
 
-		current.onplay = () => setPaused(false);
-		current.onpause = () => setPaused(true);
-		current.onvolumechange = () => setVolume(current.volume);
-		current.ontimeupdate = () => setNow(current.currentTime);
-		current.ondurationchange = () => setDuration(current.duration);
-	}, [element, paused, setVolume]);
+    current.onplay = () => setPaused(false);
+    current.onpause = () => setPaused(true);
+    current.onvolumechange = () => setVolume(current.volume);
+    current.ontimeupdate = () => setNow(current.currentTime);
+    current.ondurationchange = () => setDuration(current.duration);
+  }, [element, paused, setVolume]);
 
-	useEffect(() => {
-		if (element.current === null) return;
+  useEffect(() => {
+    if (element.current === null) return;
 
-		element.current.muted = muted;
-	}, [element, muted]);
+    element.current.muted = muted;
+  }, [element, muted]);
 
-	const play = useCallback(() => element.current?.play(), [element]);
-	const pause = useCallback(() => element.current?.pause(), [element]);
-	const seek = useCallback(
-		(progress: number) => {
-			if (element.current) element.current.currentTime = progress;
-		},
-		[element]
-	);
+  const play = useCallback(() => element.current?.play(), [element]);
+  const pause = useCallback(() => element.current?.pause(), [element]);
+  const seek = useCallback(
+    (progress: number) => {
+      if (element.current) element.current.currentTime = progress;
+    },
+    [element]
+  );
 
-	return (
-		<VideoContext.Provider
-			value={{
-				now,
-				duration,
-				muted,
-				paused,
-				volume,
-				play,
-				pause,
-				mute,
-				seek,
-				setVolume,
-			}}
-		>
-			{children}
-		</VideoContext.Provider>
-	);
+  return (
+    <VideoContext.Provider
+      value={{
+        now,
+        duration,
+        muted,
+        paused,
+        volume,
+        play,
+        pause,
+        mute,
+        seek,
+        setVolume,
+      }}
+    >
+      {children}
+    </VideoContext.Provider>
+  );
 };
