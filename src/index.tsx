@@ -67,7 +67,7 @@ export const VideoProvider = (props: VideoProviderProps) => {
   const volume = Number(savedVolume.value);
 
   const [now, setNow] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState<null | number>(null);
 
   useEffect(() => {
     if (element.current === null) return;
@@ -108,22 +108,23 @@ export const VideoProvider = (props: VideoProviderProps) => {
     [element]
   );
 
+  const value =
+    duration !== null
+      ? {
+          now,
+          duration,
+          muted,
+          paused,
+          volume,
+          play,
+          pause,
+          mute,
+          seek,
+          setVolume,
+        }
+      : null;
+
   return (
-    <VideoContext.Provider
-      value={element.current ? {
-        now,
-        duration,
-        muted,
-        paused,
-        volume,
-        play,
-        pause,
-        mute,
-        seek,
-        setVolume,
-      } : null}
-    >
-      {children}
-    </VideoContext.Provider>
+    <VideoContext.Provider value={value}>{children}</VideoContext.Provider>
   );
 };
