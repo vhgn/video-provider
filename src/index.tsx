@@ -110,7 +110,7 @@ export const VideoProvider = (props: VideoProviderProps) => {
 
   return (
     <VideoContext.Provider
-      value={{
+      value={element.current ? {
         now,
         duration,
         muted,
@@ -121,7 +121,7 @@ export const VideoProvider = (props: VideoProviderProps) => {
         mute,
         seek,
         setVolume,
-      }}
+      } : null}
     >
       {children}
     </VideoContext.Provider>
